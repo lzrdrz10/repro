@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Generador de enlaces protegidos</title>
+</head>
+<body>
+<h2>Generador de URL para Player</h2>
+<input type="text" id="video" placeholder="Enlace MP4 o M3U8" style="width:80%">
+<input type="text" id="poster" placeholder="Poster (opcional)" style="width:80%">
+<input type="text" id="title" placeholder="Título del video" style="width:80%">
+<button onclick="generar()">Generar URL</button>
+
+<p>URL generada:</p>
+<textarea id="resultado" style="width:100%;height:60px;"></textarea>
+
+<script>
+function generar() {
+    var video = btoa(document.getElementById("video").value);
+    var poster = btoa(document.getElementById("poster").value || "");
+    var title = btoa(document.getElementById("title").value || "Sin título");
+
+    var url = `${window.location.origin}/player.html?video=${video}&poster=${poster}&title=${title}`;
+    document.getElementById("resultado").value = url;
+}
+</script>
+</body>
+</html>

@@ -1,74 +1,40 @@
 <!DOCTYPE html>
-<html lang="es-ES">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>lzplay – Generador</title>
+<title>Generador de Enlaces LzPlay</title>
 <style>
-  body {
-    background: #000000;
-    color: #FFD700;
-    font-family: Arial, sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-  }
-  .panel {
-    background:#111;
-    padding:30px;
-    border-radius:10px;
-    width:350px;
-    box-shadow:0 0 20px rgba(255,255,255,0.1);
-  }
-  input, button {
-    width:100%;
-    padding:10px;
-    border:none;
-    margin:10px 0;
-    border-radius:5px;
-    font-size:14px;
-  }
-  input {
-    background:#222;
-    color:#fff;
-  }
-  button {
-    background:#FFD700;
-    color:#000;
-    cursor:pointer;
-  }
-  #resultado {
-    word-break:break-all;
-    background:#222;
-    color:#FFD700;
-    padding:10px;
-    border-radius:5px;
-    font-size:12px;
-    display:none;
-  }
+  body { font-family: Arial, sans-serif; background:#111; color:#fff; padding:20px; }
+  input { width:100%; padding:10px; margin:5px 0; border-radius:5px; border:none; }
+  button { padding:10px 20px; margin-top:10px; background:#ffc700; border:none; border-radius:5px; cursor:pointer; color:#000; font-weight:bold; }
+  #resultado-container { margin-top:15px; }
+  a { color:#0ff; word-break: break-all; text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<div class="panel">
-  <h2 style="text-align:center;color:#FFD700;">lzplay</h2>
+<h2>Generador de Enlaces LzPlay</h2>
 
-  <label>Enlace de video MP4</label>
-  <input id="video" placeholder="https://mi-servidor.com/video.mp4">
+<label>Enlace de Video (mp4/m3u8)</label>
+<input type="text" id="video" placeholder="https://">
 
-  <label>Título</label>
-  <input id="titulo" placeholder="Nombre del video">
+<label>Poster (opcional)</label>
+<input type="text" id="poster" placeholder="https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg" value="https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg">
 
-  <input id="poster" type="hidden" value="https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg"/>
+<label>Título del Video</label>
+<input type="text" id="titulo" placeholder="Nombre del video">
 
-  <button onclick="generar()">Generar Enlace</button>
-  <div id="resultado"></div>
-  <button id="copiar" style="display:none" onclick="copiar()">Copiar enlace</button>
+<button onclick="generar()">Generar Enlace</button>
+<button id="copiar" onclick="copiar()" style="display:none;">Copiar Enlace</button>
+
+<div id="resultado-container" style="display:none;">
+  <a id="resultado" href="" target="_blank"></a>
 </div>
 
 <script>
-function b64(text){ return btoa(unescape(encodeURIComponent(text))); }
+function b64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
 
 function generar(){
   var video=document.getElementById("video").value.trim();
@@ -84,20 +50,23 @@ function generar(){
   var t=b64(titulo);
   var p=b64(poster);
 
-  // Si tu reproductor se llama diferente a player.html, cámbialo aquí:
   var enlace="player.html?video="+v+"&poster="+p+"&title="+t;
 
-  document.getElementById("resultado").style.display="block";
-  document.getElementById("resultado").innerText=enlace;
+  var resultadoLink = document.getElementById("resultado");
+  resultadoLink.href = enlace;
+  resultadoLink.innerText = enlace;
+
+  document.getElementById("resultado-container").style.display="block";
   document.getElementById("copiar").style.display="block";
 }
 
 function copiar(){
-  var texto=document.getElementById("resultado").innerText;
-  navigator.clipboard.writeText(texto).then(function(){
-    alert("Enlace copiado correctamente");
+  var enlace = document.getElementById("resultado").href;
+  navigator.clipboard.writeText(enlace).then(function(){
+    alert("Enlace copiado: " + enlace);
   });
 }
 </script>
+
 </body>
 </html>

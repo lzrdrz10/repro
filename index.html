@@ -2,27 +2,31 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Generador</title>
+<title>Generador TMDB</title>
 <style>
   body { font-family: Arial, sans-serif; background:#111; color:#fff; padding:20px; }
   input { width:100%; padding:10px; margin:5px 0; border-radius:5px; border:none; }
   button { padding:10px 20px; margin-top:10px; background:#ffc700; border:none; border-radius:5px; cursor:pointer; color:#000; font-weight:bold; }
   #resultado-container { margin-top:15px; }
   a { color:#0ff; word-break: break-all; text-decoration: underline; }
+  #buscador-resultados { margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
+  .pelicula { cursor:pointer; width:100px; text-align:center; }
+  .pelicula img { width:100%; border-radius:5px; transition:0.2s; }
+  .pelicula img:hover { transform:scale(1.05); }
+  .pelicula-title { font-size:12px; margin-top:2px; }
 </style>
 </head>
 <body>
 
-<h2>Generador</h2>
+<h2>Generador con TMDB</h2>
+
+<label>Buscar película o serie</label>
+<input type="text" id="buscador" placeholder="Escribe el nombre...">
+
+<div id="buscador-resultados"></div>
 
 <label>Enlace de Video</label>
 <input type="text" id="video" placeholder="https://">
-
-<label>Poster (opcional)</label>
-<input type="text" id="poster" placeholder="https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg" value="https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg">
-
-<label>Título</label>
-<input type="text" id="titulo" placeholder="Nombre del video">
 
 <button onclick="generar()">Generar Enlace</button>
 <button id="copiar" onclick="copiar()" style="display:none;">Copiar Enlace</button>
@@ -32,23 +36,59 @@
 </div>
 
 <script>
+var TMDB_API_KEY = "38e497c6c1a043d1341416e80915669f";
+
+var tituloSeleccionado = "";
+var posterSeleccionado = "";
+
+document.getElementById("buscador").addEventListener("input", function(){
+  var query = this.value.trim();
+  if(!query) {
+    document.getElementById("buscador-resultados").innerHTML = "";
+    return;
+  }
+
+  fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=es-MX&query=${encodeURIComponent(query)}`)
+  .then(res => res.json())
+  .then(data => {
+    var resultados = data.results || [];
+    var html = "";
+    resultados.forEach(p => {
+      if(p.media_type==="movie" || p.media_type==="tv"){
+        var poster = p.poster_path ? "https://image.tmdb.org/t/p/w200"+p.poster_path : "";
+        html += `
+          <div class="pelicula" onclick="seleccionar('${p.title || p.name}','${poster}')">
+            <img src="${poster}" alt="${p.title || p.name}">
+            <div class="pelicula-title">${p.title || p.name}</div>
+          </div>`;
+      }
+    });
+    document.getElementById("buscador-resultados").innerHTML = html;
+  });
+});
+
+function seleccionar(titulo, poster){
+  tituloSeleccionado = titulo;
+  posterSeleccionado = poster;
+  document.getElementById("buscador-resultados").innerHTML = "";
+  document.getElementById("buscador").value = titulo;
+}
+
 function b64(str){
   return btoa(unescape(encodeURIComponent(str)));
 }
 
 function generar(){
   var video=document.getElementById("video").value.trim();
-  var titulo=document.getElementById("titulo").value.trim();
-  var poster=document.getElementById("poster").value.trim();
 
-  if(!video || !titulo){
-    alert("Ingresa el video y el título");
+  if(!video || !tituloSeleccionado){
+    alert("Ingresa el video y selecciona una película o serie");
     return;
   }
 
   var v=b64(video);
-  var t=b64(titulo);
-  var p=b64(poster);
+  var t=b64(tituloSeleccionado);
+  var p=b64(posterSeleccionado);
 
   var enlace="player.html?video="+v+"&poster="+p+"&title="+t;
 

@@ -1123,10 +1123,10 @@ const playerInstance = jwplayer("player").setup({
   displaytitle: true,
   displaydescription: true,
   abouttext: "Donar",
-  aboutlink: "https://www.paypal.me/luistluque",
+  aboutlink: "https://paypal.me/LzRdrgz",
   skin: { name: "netflix" },
   autostart: true,
-  mute: true,
+  mute: false,
   logo: {
     file: "https://i.ibb.co/7zG224n/IMG-20241230-030841.png",
     link: "#"
@@ -1140,7 +1140,7 @@ const playerInstance = jwplayer("player").setup({
   playlist: [
     {
       title: videoTitle,
-      description: "Estas Viendo en Blog de Pelis",
+      description: "Estas Viendo LzPlay:",
       image: posterUrl,
       sources: [
         { file: videoUrl, label: "1080p", default: true },
@@ -1158,46 +1158,32 @@ const playerInstance = jwplayer("player").setup({
 });
 
 playerInstance.on("ready", function () {
-  // Función de descarga segura usando fetch y blob
   function buttonClickAction() {
     const playlistItem = playerInstance.getPlaylistItem();
-    const fileUrl = playlistItem.file;
-    const fileName = fileUrl.split("/").pop();
-
-    fetch(fileUrl)
-      .then(response => {
-        if (!response.ok) throw new Error("No se pudo descargar el video.");
-        return response.blob();
-      })
-      .then(blob => {
-        const blobUrl = URL.createObjectURL(blob);
-        const anchor = document.createElement("a");
-        anchor.href = blobUrl;
-        anchor.download = fileName;
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        URL.revokeObjectURL(blobUrl);
-      })
-      .catch(err => {
-        console.error("Error al descargar:", err);
-        alert("No se pudo descargar el video.");
-      });
+    const anchor = document.createElement("a");
+    anchor.href = playlistItem.file;
+    anchor.setAttribute("download", playlistItem.file.split("/").pop());
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   }
 
-  // Agregar botón de descarga al player
-  playerInstance.addButton(
-    "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJub25lIiBkPSJNMCAwaDI0djI0SDB6Ii8+PHBhdGggZD0iTTMgMTloMTh2Mkgzdi0yem0xMC01LjgyOEwxOS4wNzEgNy4xbDEuNDE0IDEuNDE0TDEyIDE3IDMuNTE1IDguNTE1IDQuOTI5IDcuMSAxMSAxMy4xN1YyaDJ2MTEuMTcyeiIgZmlsbD0icmdiYSgyNDcsMjQ3LDI0NywxKSIvPjwvc3ZnPg==",
-    "Descargar Video",
-    buttonClickAction,
-    "download-video-button"
-  );
+  if (false) {
+    playerInstance.addButton(
+      "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJub25lIiBkPSJNMCAwaDI0djI0SDB6Ii8+PHBhdGggZD0iTTMgMTloMTh2Mkgzdi0yem0xMC01LjgyOEwxOS4wNzEgNy4xbDEuNDE0IDEuNDE0TDEyIDE3IDMuNTE1IDguNTE1IDQuOTI5IDcuMSAxMSAxMy4xN1YyaDJ2MTEuMTcyeiIgZmlsbD0icmdiYSgyNDcsMjQ3LDI0NywxKSIvPjwvc3ZnPg==",
+      "Descargar Video",
+      buttonClickAction,
+      "download-video-button"
+    );
+  }
 
   const playerContainer = playerInstance.getContainer();
   const rewindContainer = playerContainer.querySelector(".jw-display-icon-rewind");
   const nextContainer = playerContainer.querySelector(".jw-display-icon-next");
-  if (nextContainer) nextContainer.remove();
-
+  if (nextContainer) {
+    nextContainer.remove(); // Remove the .jw-display-icon-next element
+  }
   if (rewindContainer) {
     const forwardContainer = rewindContainer.cloneNode(true);
     const forwardDisplayButton = forwardContainer.querySelector(".jw-icon-rewind");
@@ -1284,8 +1270,7 @@ playerInstance.on('play', function () {
     hasEnteredFullscreen = true;
   }
 });
-</script>
-
+  </script>
 
 
 </body>

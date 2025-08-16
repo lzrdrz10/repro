@@ -1,27 +1,102 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-ES">
 <head>
 <meta charset="UTF-8">
-<title>Generador de enlaces protegidos</title>
+<title>lzplay – Generador</title>
+<style>
+  body {
+    background: #000000;
+    color: #FFD700;
+    font-family: Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+  }
+  .panel {
+    background:#111;
+    padding:30px;
+    border-radius:10px;
+    width:350px;
+    box-shadow:0 0 20px rgba(255,255,255,0.1);
+  }
+  input, button {
+    width:100%;
+    padding:10px;
+    border:none;
+    margin:10px 0;
+    border-radius:5px;
+    font-size:14px;
+  }
+  input {
+    background:#222;
+    color:#fff;
+  }
+  button {
+    background:#FFD700;
+    color:#000;
+    cursor:pointer;
+  }
+  #resultado {
+    word-break:break-all;
+    background:#222;
+    color:#FFD700;
+    padding:10px;
+    border-radius:5px;
+    font-size:12px;
+    display:none;
+  }
+</style>
 </head>
 <body>
-<h2>Generador de URL para Player</h2>
-<input type="text" id="video" placeholder="Enlace MP4 o M3U8" style="width:80%">
-<input type="text" id="poster" placeholder="Poster (opcional)" style="width:80%">
-<input type="text" id="title" placeholder="Título del video" style="width:80%">
-<button onclick="generar()">Generar URL</button>
 
-<p>URL generada:</p>
-<textarea id="resultado" style="width:100%;height:60px;"></textarea>
+<div class="panel">
+  <h2 style="text-align:center;color:#FFD700;">lzplay</h2>
+
+  <label>Enlace de video MP4</label>
+  <input id="video" placeholder="https://mi-servidor.com/video.mp4">
+
+  <label>Título</label>
+  <input id="titulo" placeholder="Nombre del video">
+
+  <input id="poster" type="hidden" value="https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg"/>
+
+  <button onclick="generar()">Generar Enlace</button>
+  <div id="resultado"></div>
+  <button id="copiar" style="display:none" onclick="copiar()">Copiar enlace</button>
+</div>
 
 <script>
-function generar() {
-    var video = btoa(document.getElementById("video").value);
-    var poster = btoa(document.getElementById("poster").value || "");
-    var title = btoa(document.getElementById("title").value || "Sin título");
+function b64(text){ return btoa(unescape(encodeURIComponent(text))); }
 
-    var url = `${window.location.origin}/player.html?video=${video}&poster=${poster}&title=${title}`;
-    document.getElementById("resultado").value = url;
+function generar(){
+  var video=document.getElementById("video").value.trim();
+  var titulo=document.getElementById("titulo").value.trim();
+  var poster=document.getElementById("poster").value.trim();
+
+  if(!video || !titulo){
+    alert("Ingresa el video y el título");
+    return;
+  }
+
+  var v=b64(video);
+  var t=b64(titulo);
+  var p=b64(poster);
+
+  // Si tu reproductor se llama diferente a player.html, cámbialo aquí:
+  var enlace="player.html?video="+v+"&poster="+p+"&title="+t;
+
+  document.getElementById("resultado").style.display="block";
+  document.getElementById("resultado").innerText=enlace;
+  document.getElementById("copiar").style.display="block";
+}
+
+function copiar(){
+  var texto=document.getElementById("resultado").innerText;
+  navigator.clipboard.writeText(texto).then(function(){
+    alert("Enlace copiado correctamente");
+  });
 }
 </script>
 </body>

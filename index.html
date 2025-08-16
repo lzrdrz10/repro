@@ -55,12 +55,14 @@ document.getElementById("buscador").addEventListener("input", function(){
     var html = "";
     resultados.forEach(p => {
       if(p.media_type==="movie" || p.media_type==="tv"){
-        var poster = p.poster_path ? "https://image.tmdb.org/t/p/w200"+p.poster_path : "";
-        html += `
-          <div class="pelicula" onclick="seleccionar('${p.title || p.name}','${poster}')">
-            <img src="${poster}" alt="${p.title || p.name}">
-            <div class="pelicula-title">${p.title || p.name}</div>
-          </div>`;
+       // Dentro del fetch de resultados
+var backdrop = p.backdrop_path ? "https://image.tmdb.org/t/p/original"+p.backdrop_path : "";
+html += `
+  <div class="pelicula" onclick="seleccionar('${p.title || p.name}','${backdrop}')">
+    <img src="${p.poster_path ? 'https://image.tmdb.org/t/p/w200'+p.poster_path : ''}" alt="${p.title || p.name}">
+    <div class="pelicula-title">${p.title || p.name}</div>
+  </div>`;
+
       }
     });
     document.getElementById("buscador-resultados").innerHTML = html;

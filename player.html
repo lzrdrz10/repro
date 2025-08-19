@@ -1032,8 +1032,8 @@ Icone de Share.
   background-repeat: no-repeat;
 }
 
-  
-  
+.jw-icon-cast { display: none !important; }
+
 </style>
 
 </head>
@@ -1120,6 +1120,7 @@ function savePlaybackProgress(time) {
 const playerInstance = jwplayer("player").setup({
   controls: true,
   sharing: false,
+  cast: false,
   displaytitle: true,
   displaydescription: true,
   abouttext: "Donar",

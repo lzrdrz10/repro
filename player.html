@@ -1032,6 +1032,8 @@ Icone de Share.
   background-repeat: no-repeat;
 }
 
+  
+  
 </style>
 
 </head>
@@ -1125,10 +1127,8 @@ const playerInstance = jwplayer("player").setup({
   skin: { name: "netflix" },
   autostart: true,
   mute: false,
-  logo: false{
-    file: "https://i.ibb.co/7zG224n/IMG-20241230-030841.png",
-    link: "#"
-  },
+logo: false,
+
   captions: {
     color: "#FFF",
     fontSize: 14,
@@ -1204,7 +1204,15 @@ playerInstance.on("ready", function () {
     });
   }
 
-  
+  const logoElement = playerContainer.querySelector(".jw-logo");
+  if (logoElement) {
+    logoElement.addEventListener("click", function () {
+      const playlistItem = playerInstance.getPlaylistItem();
+      const videoUrl = playlistItem.file;
+      const webVideoCasterUrl = `wvc-x-callback://open?url=${encodeURIComponent(videoUrl)}&secure_uri=true`;
+      window.location.href = webVideoCasterUrl;
+    });
+  }
 
   const slider = playerContainer.querySelector(".jw-slider-time");
   const buttonContainer = playerContainer.querySelector(".jw-button-container");

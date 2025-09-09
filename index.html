@@ -6,27 +6,48 @@
 <style>
   body { font-family: Arial, sans-serif; background:#111; color:#fff; padding:20px; }
   input { width:100%; padding:10px; margin:5px 0; border-radius:5px; border:none; }
-  button { padding:10px 20px; margin-top:10px; background:#ffc700; border:none; border-radius:5px; cursor:pointer; color:#000; font-weight:bold; }
+  button { padding:10px 20px; margin:5px; background:#ffc700; border:none; border-radius:5px; cursor:pointer; color:#000; font-weight:bold; }
   #resultado-container { margin-top:15px; }
   a { color:#0ff; word-break: break-all; text-decoration: underline; }
   #buscador-resultados { margin-top:5px; display:flex; flex-wrap:wrap; gap:10px; }
   .pelicula { cursor:pointer; width:100px; text-align:center; }
   .pelicula img { width:100%; border-radius:5px; transition:0.2s; }
   .pelicula img:hover { transform:scale(1.05); }
-  .pelicula-title { font-size:12px; margin-top:2px; }
+  .pelicula-title { font-size:12px; margin-top:2px; color:#fff; line-height:1.2; }
+  .pelicula-year { font-size:11px; color:#ffc700; opacity:0.85; }
+  .modo-container { margin:10px 0; }
 </style>
 </head>
 <body>
 
-<h2>Generador con TMDB</h2>
+<h2>Generador de Enlaces</h2>
 
-<label>Buscar película o serie</label>
-<input type="text" id="buscador" placeholder="Escribe el nombre...">
+<div class="modo-container">
+  <button onclick="cambiarModo('tmdb')">🔍 Usar TMDB</button>
+  <button onclick="cambiarModo('manual')">✍️ Modo Manual</button>
+</div>
 
-<div id="buscador-resultados"></div>
+<!-- 🔍 MODO TMDB -->
+<div id="modo-tmdb">
+  <label>Buscar película o serie</label>
+  <input type="text" id="buscador" placeholder="Escribe el nombre...">
+  <div id="buscador-resultados"></div>
 
-<label>Enlace de Video</label>
-<input type="text" id="video" placeholder="https://">
+  <label>Enlace de Video</label>
+  <input type="text" id="video" placeholder="https://...">
+</div>
+
+<!-- ✍️ MODO MANUAL -->
+<div id="modo-manual" style="display:none;">
+  <label>Título</label>
+  <input type="text" id="manual-titulo" placeholder="Título de la película o serie">
+
+  <label>Imagen (URL del póster)</label>
+  <input type="text" id="manual-poster" placeholder="https://...">
+
+  <label>Enlace de Video</label>
+  <input type="text" id="manual-video" placeholder="https://...">
+</div>
 
 <button onclick="generar()">Generar Enlace</button>
 <button id="copiar" onclick="copiar()" style="display:none;">Copiar Enlace</button>
@@ -40,7 +61,25 @@ var TMDB_API_KEY = "38e497c6c1a043d1341416e80915669f";
 
 var tituloSeleccionado = "";
 var posterSeleccionado = "";
+var modo = "tmdb"; // por defecto
 
+// ==== FUNCIONES BASE64 UTF-8 ====
+function toBase64UTF8(str) {
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(str);
+  let binary = "";
+  bytes.forEach(b => binary += String.fromCharCode(b));
+  return btoa(binary);
+}
+
+// ==== CAMBIAR MODO ====
+function cambiarModo(nuevoModo){
+  modo = nuevoModo;
+  document.getElementById("modo-tmdb").style.display = (modo === "tmdb") ? "block" : "none";
+  document.getElementById("modo-manual").style.display = (modo === "manual") ? "block" : "none";
+}
+
+// ==== BUSCADOR TMDB ====
 document.getElementById("buscador").addEventListener("input", function(){
   var query = this.value.trim();
   if(!query) {
@@ -55,14 +94,16 @@ document.getElementById("buscador").addEventListener("input", function(){
     var html = "";
     resultados.forEach(p => {
       if(p.media_type==="movie" || p.media_type==="tv"){
-       // Dentro del fetch de resultados
-var backdrop = p.backdrop_path ? "https://image.tmdb.org/t/p/original"+p.backdrop_path : "";
-html += `
-  <div class="pelicula" onclick="seleccionar('${p.title || p.name}','${backdrop}')">
-    <img src="${p.poster_path ? 'https://image.tmdb.org/t/p/w200'+p.poster_path : ''}" alt="${p.title || p.name}">
-    <div class="pelicula-title">${p.title || p.name}</div>
-  </div>`;
+        var backdrop = p.backdrop_path ? "https://image.tmdb.org/t/p/original"+p.backdrop_path : "";
+        var titulo = p.title || p.name;
+        var fecha = p.release_date || p.first_air_date || "";
+        var year = fecha ? fecha.split("-")[0] : "N/A";
 
+        html += `
+          <div class="pelicula" onclick="seleccionar('${titulo}','${backdrop}')">
+            <img src="${p.poster_path ? 'https://image.tmdb.org/t/p/w200'+p.poster_path : ''}" alt="${titulo}">
+            <div class="pelicula-title">${titulo} <span class="pelicula-year">(${year})</span></div>
+          </div>`;
       }
     });
     document.getElementById("buscador-resultados").innerHTML = html;
@@ -76,21 +117,29 @@ function seleccionar(titulo, poster){
   document.getElementById("buscador").value = titulo;
 }
 
-function b64(str){
-  return btoa(unescape(encodeURIComponent(str)));
-}
-
+// ==== GENERAR ENLACE ====
 function generar(){
-  var video=document.getElementById("video").value.trim();
+  var video;
 
-  if(!video || !tituloSeleccionado){
-    alert("Ingresa el video y selecciona una película o serie");
-    return;
+  if(modo === "tmdb"){
+    video = document.getElementById("video").value.trim();
+    if(!video || !tituloSeleccionado){
+      alert("Ingresa el video y selecciona una película o serie");
+      return;
+    }
+  } else {
+    tituloSeleccionado = document.getElementById("manual-titulo").value.trim();
+    posterSeleccionado = document.getElementById("manual-poster").value.trim();
+    video = document.getElementById("manual-video").value.trim();
+    if(!video || !tituloSeleccionado || !posterSeleccionado){
+      alert("Completa todos los campos en modo manual");
+      return;
+    }
   }
 
-  var v=b64(video);
-  var t=b64(tituloSeleccionado);
-  var p=b64(posterSeleccionado);
+  var v = toBase64UTF8(video);
+  var t = toBase64UTF8(tituloSeleccionado);
+  var p = toBase64UTF8(posterSeleccionado);
 
   var enlace="player.html?video="+v+"&poster="+p+"&title="+t;
 
@@ -102,6 +151,7 @@ function generar(){
   document.getElementById("copiar").style.display="block";
 }
 
+// ==== COPIAR ENLACE ====
 function copiar(){
   var enlace = document.getElementById("resultado").href;
   navigator.clipboard.writeText(enlace).then(function(){

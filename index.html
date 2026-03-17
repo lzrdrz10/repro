@@ -63,14 +63,6 @@ var tituloSeleccionado = "";
 var posterSeleccionado = "";
 var modo = "tmdb"; // por defecto
 
-// ==== FUNCIONES BASE64 UTF-8 ====
-function toBase64UTF8(str) {
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(str);
-  let binary = "";
-  bytes.forEach(b => binary += String.fromCharCode(b));
-  return btoa(binary);
-}
 
 // ==== CAMBIAR MODO ====
 function cambiarModo(nuevoModo){
@@ -120,7 +112,6 @@ function seleccionar(titulo, poster){
 // ==== GENERAR ENLACE ====
 function generar(){
   var video;
-
   if(modo === "tmdb"){
     video = document.getElementById("video").value.trim();
     if(!video || !tituloSeleccionado){
@@ -137,16 +128,12 @@ function generar(){
     }
   }
 
-  var v = toBase64UTF8(video);
-  var t = toBase64UTF8(tituloSeleccionado);
-  var p = toBase64UTF8(posterSeleccionado);
-
-  var enlace="player.html?video="+v+"&poster="+p+"&title="+t;
+  // ✅ Aquí está la magia
+  var enlace = `player.html?video=${encodeURIComponent(video)}&poster=${encodeURIComponent(posterSeleccionado)}&title=${encodeURIComponent(tituloSeleccionado)}`;
 
   var resultadoLink = document.getElementById("resultado");
   resultadoLink.href = enlace;
   resultadoLink.innerText = enlace;
-
   document.getElementById("resultado-container").style.display="block";
   document.getElementById("copiar").style.display="block";
 }

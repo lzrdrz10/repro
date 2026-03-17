@@ -1,4 +1,4 @@
- <!--DOCTYPE html-->
+<!DOCTYPE html>
 <html lang="es-ES" >
 <head>
     <style>
@@ -1083,19 +1083,13 @@ Icone de Share.
 
 <script>
 function getUrlParameter(name) {
-  name = name.replace(/[\[\]]/g, "\\$&");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(location.search);
-  return results ? decodeURIComponent(results[1].replace(/\+/g, " ")) : "";
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name) || "";
 }
 
-const videoBase64 = getUrlParameter("video");
-const posterBase64 = getUrlParameter("poster");
-const titleBase64 = getUrlParameter("title");
-
-const videoUrl = atob(videoBase64) || "default-video.mp4";
-const posterUrl = atob(posterBase64) || "default-poster.jpg";
-const videoTitle = atob(titleBase64) || "Sin título";
+const videoUrl   = decodeURIComponent(getUrlParameter("video"))   || "default-video.mp4";
+const posterUrl  = decodeURIComponent(getUrlParameter("poster"))  || "";
+const videoTitle = decodeURIComponent(getUrlParameter("title"))   || "Sin título";
 
 const timeElapseKey = `playbackTime_${videoTitle.replace(/\s+/g, '_')}`;
 
